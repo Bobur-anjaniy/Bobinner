@@ -2728,7 +2728,7 @@ GameObject:
   - component: {fileID: 346037349}
   m_Layer: 0
   m_Name: Saw
-  m_TagString: Respawn
+  m_TagString: Pila
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

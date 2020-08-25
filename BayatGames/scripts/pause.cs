@@ -34,14 +34,17 @@ public class pause : MonoBehaviour
     }
     public void restart ()
     {
+        
         Scene scene = SceneManager.GetActiveScene();
         int ActiveScene = scene.buildIndex;
         Time.timeScale = 1f;
         // activ senani int ga o'tkizadi.(shartmas)
+        GameObject.Find("charter").GetComponent<character>().cointdel();
         SceneManager.LoadScene(scene.buildIndex);
     }
-    public void Home ()
-    {
+    public void Home() {
+        GameObject.Find("charter").GetComponent<character>().cointdel();
+        
         Time.timeScale = 1f;
         SceneManager.LoadScene(0);
     }

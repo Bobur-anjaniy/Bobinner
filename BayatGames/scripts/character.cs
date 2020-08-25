@@ -18,6 +18,7 @@ public class character : MonoBehaviour {
     int coin3 = 0; // faol bosqichda yig'ilgan tangalar soni. 
     bool dead1 = true; // personaj trikligi 
     static  int Adcount = 0;
+    int sceneIndex, levelPassed;
     //private const string GameOver = "ca-app-pub-5527213689499353/7367062707";
     //private const string banner = "ca-app-pub-5527213689499353/6168589152";
     //private InterstitialAd ad;
@@ -39,7 +40,11 @@ public class character : MonoBehaviour {
     new private Rigidbody2D rigidbody;
     private Animator animator;
     private SpriteRenderer sprite;
-
+     void Start()
+    {
+        sceneIndex = SceneManager.GetActiveScene().buildIndex;
+        levelPassed = PlayerPrefs.GetInt("LevelPassed");
+    }
 
     private void Awake()
     {
@@ -58,6 +63,9 @@ public class character : MonoBehaviour {
     private void FixedUpdate()
     {
         CheckGround();
+        if (((Input.GetAxis("Horizontal")) != 0) && isGrounded && dead1)
+        { State = CharState.Run; 
+        }
     }
 
     private void Update()
@@ -67,7 +75,8 @@ public class character : MonoBehaviour {
             Advertisement.Initialize("3505241");
 
 
-        if (isGrounded && dead1) {  // pesonaj yerda xamda tirik bo'lsa bajaraladigan ishlar.
+        if (isGrounded && dead1 && (Input.GetAxis("Horizontal") == 0)) {  // pesonaj yerda xamda tirik bo'lsa bajaraladigan ishlar.
+          
             State = CharState.Idl; // pesonaj tinch xolatdagi animatsiya
                                    // State = CharState.Blink;
 
@@ -87,18 +96,22 @@ public class character : MonoBehaviour {
             Adcount++;
             State = CharState.dead;                                      // personajni olim animatsiyasini qo'yamiz
             PlayerPrefs.SetInt("coin", PlayerPrefs.GetInt("coin") - coin3); // personaj shu senada yig'gan tangalarni ayriymiz.
-                                                                            // coin2.text = PlayerPrefs.GetInt("coin").ToString();
+            GameObject.Find("Dead").GetComponent<audio>().PlayA();                                                                // coin2.text = PlayerPrefs.GetInt("coin").ToString();
 
             Invoke("RestarLevel", 2); // RestartLevel degan funksiyani 2 sekuntdan keyin chaqiramiz chunki animatsiya bajarilishi uchun
-            //ad = new InterstitialAd(GameOver);
-            //AdRequest request = new AdRequest.Builder().Build();
-            //AdRequest request = new AdRequest.Builder().AddTestDevice(AdRequest.TestDeviceSimulator).AddTestDevice("301E1505CF44E4F1").Build();
+          
 
+        }
+        else if ((Player.gameObject.tag == "Pila") && dead1)
+        { // personajni "Respawn" tegiga kirsa bajariladigan ishlar
+            dead1 = false;                                  // personajni o'lgan deymiz
+            rigidbody.drag = 100000.0f;                     //personajning havodagi qarshiligini belgiledi.
+            Adcount++;
+            State = CharState.dead;                                      // personajni olim animatsiyasini qo'yamiz
+            PlayerPrefs.SetInt("coin", PlayerPrefs.GetInt("coin") - coin3); // personaj shu senada yig'gan tangalarni ayriymiz.
+            GameObject.Find("DeadPila").GetComponent<audio>().PlayA();                                                                // coin2.text = PlayerPrefs.GetInt("coin").ToString();
 
-           // ad.LoadAd(request);
-            //ad.IsLoaded();
-            //ad.OnAdLoaded += OnAdLoaded;
-            //ad.Show();
+            Invoke("RestarLevel", 2); // RestartLevel degan funksiyani 2 sekuntdan keyin chaqiramiz chunki animatsiya bajarilishi uchun
 
 
         }
@@ -107,8 +120,8 @@ public class character : MonoBehaviour {
             Destroy(Player.gameObject); // tegilgan obyeqtni o'yindan o'chiriladi.(tangani)
             coin3++; // bosqichda yig'iladigan tangalar soni
             PlayerPrefs.SetInt("coin", PlayerPrefs.GetInt("coin") + 1); //Umumiy tangalar soniga 1 qo'shiladi.
-                                                                        // coin2.text = PlayerPrefs.GetInt("coin").ToString();
-
+            GameObject.Find("GetCoint").GetComponent<audio>().PlayA();                                                            // coin2.text = PlayerPrefs.GetInt("coin").ToString();
+            
         }
 
         else if (Player.tag == "Finish") { // finish tegiga tegsa bo'ladigan xodisalar
@@ -119,7 +132,7 @@ public class character : MonoBehaviour {
         }
     }
     void RestarLevel() {      // shu bosqichni qayta boshledigan funksiya
-        if (Advertisement.IsReady() /*&&  (Adcount % 2 == 0)*/ )
+        if (Advertisement.IsReady() &&  (Adcount % 2 == 0) )
         {
             Advertisement.Show();
                 }
@@ -128,8 +141,13 @@ public class character : MonoBehaviour {
         int ActiveScene = scene.buildIndex; // activ senani int ga o'tkizadi.(shartmas)
         SceneManager.LoadScene(ActiveScene); // aactiv senani yuklaydi
     }
-
+    public void cointdel()
+    {
+        PlayerPrefs.SetInt("coin", PlayerPrefs.GetInt("coin") - coin3);
+    }
     void FinishLevel() { // finish funksiyasi
+        if (levelPassed < sceneIndex)
+            PlayerPrefs.SetInt("LevelPassed", sceneIndex);
         Scene scene = SceneManager.GetActiveScene();//scene ni faol sena bilan tengledi
         int ActiveScene = scene.buildIndex; // scenani raqamini aniqledi
 
@@ -151,9 +169,11 @@ public class character : MonoBehaviour {
 
             transform.position = Vector3.MoveTowards(transform.position, transform.position + direction, speed * Time.deltaTime);
 
-            sprite.flipX = direction.x <= 0.0f;// Personaj spritini x o'qi bilan ko'zgulashadi.
-            if (isGrounded) // agar yerda bo'lsa yugurish animatsiyasi bajariladi
-                State = CharState.Run;
+            //sprite.flipX = direction.x <= 0.0f;// Personaj spritini x o'qi bilan ko'zgulashadi.
+           // if ((isGrounded)) // agar yerda bo'lsa yugurish animatsiyasi bajariladi
+                //State = CharState.Run;
+            
+            //animation["Run"].speed = 1;
         }
     }
     private void Jump() //sakirash funksiyasi
@@ -179,7 +199,20 @@ public class character : MonoBehaviour {
       //      ad.Show();
         }
     }
+    public void SprateFlipT()
+    {
+        
+            sprite.flipX = true;
+        
 
+    }
+    public void SprateFlipF()
+    {
+        
+            sprite.flipX = false;
+        
+    }
+  
 }
 public enum CharState
 {

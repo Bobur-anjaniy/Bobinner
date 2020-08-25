@@ -59,6 +59,17 @@ namespace LeoLuz.PlugAndPlayJoystick
                 Input.PressButtonMobile(AxisName);
                 CurrentValue = Value;
                 Input.SetAxisMobile(AxisName, CurrentValue);
+                if (Value > 0)
+                {
+                    //Debug.Log("o'nga ");
+                    GameObject.Find("charter").GetComponent<character>().SprateFlipF();
+                }
+
+                if (Value < 0)
+                {
+                    //Debug.Log("Chapga");
+                    GameObject.Find("charter").GetComponent<character>().SprateFlipT();
+                }
             }
         }
 
